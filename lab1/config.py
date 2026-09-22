@@ -13,7 +13,7 @@ WINDOW = "signals/window.wav"
 def Signal(x):
     return np.sin(2*np.pi*6345*x + 203*np.pi/180)
 
-FD = 30000
+FD = 44100
 F0 = 6383
 Fn = 8395
 

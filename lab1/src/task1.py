@@ -52,20 +52,22 @@ def SubTask3():
     N = len(data)
 
     noise = np.random.normal(0,1,size=N)
+    
     spectr = np.fft.fft(noise)
     freq = np.fft.fftfreq(N,1/fd)
     mask = (np.abs(freq) < con.F0) | (np.abs(freq) > con.Fn)
     spectr[mask] = 0
 
     noise = np.fft.ifft(spectr).real
-
+    noise = noise / np.max(np.abs(noise))
     noise_power = np.mean(noise**2)
 
      
     signal_power = np.mean(data**2)
+    print(signal_power,noise_power,sep=' ')
     noise = noise* np.sqrt(signal_power/noise_power)
 
-    data += noise
+    data += noise*10
     data = data/np.max(np.abs(data))
 
     fig,axes = plt.subplots(2,1,figsize= (12,8))
