@@ -43,10 +43,16 @@ def SubTask2():
     data = data/np.max(np.abs(data))
     orig = data.copy()
     N = len(data)
-    noise = np.random.normal(0,1,int(con.Tnoise * fd))
-    noise = noise / np.max(np.abs(noise))
+    # noise = np.random.normal(0,1,int(con.Tnoise * fd))
+    # noise = noise / np.max(np.abs(noise))
+
+    noise_len = int(con.Tnoise*fd)
+    barker_len = 13
+    samples_per_bit = noise_len//barker_len
+    noise = con.barker_signal(barker_len, samples_per_bit)
+
     ind = int(con.T0 * fd)
-    end_ind = int(ind + con.Tnoise*fd)
+    end_ind = int(ind + len(noise))
 
 
     data[ind: end_ind] += noise
@@ -80,27 +86,42 @@ def SubTask2():
 def SubTask3():
     fd, data = gen.readFromFile(con.NOISE)
     fd, noise = gen.readFromFile(con.NOISE_sound)
+    fd, dataORIG = gen.readFromFile(con.START)
 
+    dataORIG = dataORIG.mean(axis=1)
     data = data/np.max(np.abs(data))
     noise = noise/np.max(np.abs(noise))
+    dataORIG = dataORIG/np.max(np.abs(dataORIG))
+
 
     N = len(data)
-    h = noise[::-1]
+    h = noise[::-1] 
     y = np.convolve(data,h,mode='same')
 
     peak_ind = np.argmax(np.abs(y))
     peak_time = peak_ind / fd
 
+    acf_noise = con.correlate(noise)
+    
+
+    
+
     t = np.linspace(0,con.DUR, N)
 
-    fig, axes = plt.subplots(2,1, figsize=(12,8))
 
-    axes[0].plot(t,data)
-    axes[0].grid(True)
 
-    axes[1].plot(t,y)
-    axes[1].grid(True)
+
+    fig, axes = plt.subplots(2,2, figsize=(12,8))
+
+    axes[0][0].plot(t,data)
+    axes[0][0].grid(True)
+
+    axes[0][1].plot(t,y)
+    axes[0][1].grid(True)
     y = y/np.max(np.abs(y))
+
+    # axes[1][0].plot(lags,acf_orig)
+    axes[1][1].plot(t, acf_noise)
     # gen.generateSignalintoFile(y,fd,con.result)
     plt.tight_layout()
     plt.show()
@@ -108,7 +129,17 @@ def SubTask3():
 
 
 def main():
-    SubTask3()
+    parser = argparse.ArgumentParser(description="выберите номер задания")
+    parser.add_argument("--mode",
+                        choices=["orig","filter", "noise"],
+                        required=True)
+    args = parser.parse_args()
+    if args.mode == "orig":
+        SubTask1()
+    elif args.mode == "noise":    
+        SubTask2()
+    elif args.mode == "filter":
+        SubTask3()
 
 
 if __name__ == "__main__":
