@@ -16,7 +16,7 @@ import lab1.scripts.generate as gen
 import lab3.config as con
 
 def SubTask1():
-    print(con.START)
+
     data, fd = librosa.load(con.START)
     data /= np.max(np.abs(data))
     N = len(data)
